@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Noise Background</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #1a1a1a; /* Base background color */
+      overflow: hidden;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* Noise layer won't interfere with clicks */
+    }
+    .texture-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('1000_F_138588771_LJ1VJ6oy6b9l4O3sWfDiCP8ePNrXNN6Z.jpg') repeat; /* Replace with your texture image */
+      mix-blend-mode: overlay; /* Blend texture with noise */
+      opacity: 0.5; /* Adjust transparency for effect */
+      pointer-events: none; /* Prevent interactions */
+    }
+  </style>
+</head>
+<body>
+  <canvas id="noiseCanvas"></canvas>
+  <div class="texture-layer">
+  </div>
+  <script>
+    const canvas = document.getElementById('noiseCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    function generateNoise() {
+      const imageData = ctx.createImageData(canvas.width, canvas.height);
+      const buffer32 = new Uint32Array(imageData.data.buffer);
+
+      for (let i = 0; i < buffer32.length; i++) {
+        // Adjust frequency: Include random pixels (e.g., 50% frequency)
+        if (Math.random() < 0.06) { // 0.5 controls frequency (lower = sparser noise)
+          buffer32[i] = (128 << 23) | // Alpha (Opacity: 128 out of 255)
+                        (Math.random() * 255 << 16) | // Red
+                        (Math.random() * 255 << 8) | // Green
+                        Math.random() * 255; // Blue
+        } else {
+          buffer32[i] = (0 << 24); // Transparent pixel
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      requestAnimationFrame(generateNoise);
+    }
+
+    generateNoise();
+  </script>
+</body>
+</html>
